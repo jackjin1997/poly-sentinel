@@ -1,0 +1,36 @@
+{
+  "name": "poly-sentinel",
+  "version": "0.1.0",
+  "description": "Polymarket arbitrage monitoring and execution system",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test:api": "tsx scripts/test-api.ts"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "keywords": [
+    "polymarket",
+    "arbitrage",
+    "crypto",
+    "trading"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.10.0",
+    "axios": "^1.6.5",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0",
+    "prompts": "^2.4.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.6",
+    "@types/prompts": "^2.4.9",
+    "tsx": "^4.7.0"
+  }
+}
