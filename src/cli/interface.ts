@@ -67,6 +67,30 @@ export class CLIInterface {
     if (opportunity.liquidity) {
       console.log(`   Liquidity: $${opportunity.liquidity.toFixed(0)}`);
     }
+
+    // Display AI analysis if available
+    if (opportunity.aiAnalysis) {
+      console.log('\n🤖 AI Analysis:');
+      console.log(`   ${opportunity.aiAnalysis.summary}`);
+      console.log(`   Confidence: ${(opportunity.aiAnalysis.aggregatedConfidence * 100).toFixed(0)}%`);
+      console.log(`   Recommendation: ${this.getRecommendationEmoji(opportunity.aiAnalysis.finalRecommendation)} ${opportunity.aiAnalysis.finalRecommendation}`);
+      
+      // Show sentiment details if available
+      if (opportunity.aiAnalysis.sentiment) {
+        console.log(`\n   💭 Sentiment: ${opportunity.aiAnalysis.sentiment.reasoning}`);
+        if (opportunity.aiAnalysis.sentiment.riskFactors && opportunity.aiAnalysis.sentiment.riskFactors.length > 0) {
+          console.log(`   ⚠️  Risks: ${opportunity.aiAnalysis.sentiment.riskFactors.join(', ')}`);
+        }
+      }
+    }
+  }
+
+  private getRecommendationEmoji(recommendation: 'BUY' | 'HOLD' | 'SKIP'): string {
+    switch (recommendation) {
+      case 'BUY': return '✅';
+      case 'HOLD': return '⏸️';
+      case 'SKIP': return '❌';
+    }
   }
 
   displayWelcomeBanner(): void {
@@ -78,6 +102,12 @@ export class CLIInterface {
       `   Min Profit: ${(config.trading.minProfitMargin * 100).toFixed(1)}%`
     );
     console.log(`   Max Trade: $${config.trading.maxTradeAmount}`);
+    
+    // Show AI status
+    if (config.ai?.enabled) {
+      console.log(`   🤖 AI: Enabled (${config.ai.model})`);
+    }
+    
     console.log("═".repeat(80) + "\n");
   }
 

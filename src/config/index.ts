@@ -57,6 +57,18 @@ export const config: Config = {
     maxSlippage: getNumericEnv("MAX_SLIPPAGE", 0.01),
     gasPriceMultiplier: getNumericEnv("GAS_PRICE_MULTIPLIER", 1.2),
   },
+  ai: {
+    enabled: getBooleanEnv("AI_ENABLED", false),
+    provider: (getOptionalEnv("AI_PROVIDER", "openai") as "openai" | "ollama"),
+    apiKey: process.env.OPENAI_API_KEY,
+    model: getOptionalEnv("AI_MODEL", "gpt-4o-mini"),
+    baseUrl: process.env.AI_BASE_URL,
+    temperature: getNumericEnv("AI_TEMPERATURE", 0.7),
+    enabledAgents: getOptionalEnv("AI_ENABLED_AGENTS", "sentiment")
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s),
+  },
 };
 
 // Validate wallet configuration
@@ -95,6 +107,17 @@ export function printConfig(): void {
       ? "✅ Configured"
       : "❌ Not configured"
   );
+  
+  // AI configuration
+  if (config.ai?.enabled) {
+    console.log("  🤖 AI Analysis: ✅ Enabled");
+    console.log(`     Provider: ${config.ai.provider}`);
+    console.log(`     Model: ${config.ai.model}`);
+    console.log(`     Agents: ${config.ai.enabledAgents.join(", ")}`);
+  } else {
+    console.log("  🤖 AI Analysis: ❌ Disabled");
+  }
+  
   console.log("");
 }
 

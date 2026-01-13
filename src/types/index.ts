@@ -54,6 +54,26 @@ export interface ArbitrageOpportunity {
   timestamp: Date;
   yesTokenId?: string;
   noTokenId?: string;
+  aiAnalysis?: AIAnalysis;  // Optional AI agent analysis
+}
+
+// AI Analysis Types
+export interface AIAnalysis {
+  sentiment?: AgentResult;
+  risk?: AgentResult;
+  event?: AgentResult;
+  technical?: AgentResult;
+  finalRecommendation: 'BUY' | 'HOLD' | 'SKIP';
+  aggregatedConfidence: number;
+  summary: string;
+}
+
+export interface AgentResult {
+  confidence: number;
+  recommendation: 'BUY' | 'HOLD' | 'SKIP';
+  reasoning: string;
+  score?: number;
+  riskFactors?: string[];
 }
 
 // Trading Types
@@ -93,6 +113,15 @@ export interface Config {
     minLiquidity: number;
     maxSlippage: number;
     gasPriceMultiplier: number;
+  };
+  ai?: {
+    enabled: boolean;
+    provider: 'openai' | 'ollama';
+    apiKey?: string;
+    model: string;
+    baseUrl?: string;
+    temperature?: number;
+    enabledAgents: string[];
   };
 }
 

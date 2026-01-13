@@ -2,16 +2,31 @@ import { Market, ArbitrageOpportunity, BestPrices } from "../types";
 import { config } from "../config";
 import { logger } from "../utils/logger";
 import PolymarketAPI from "../services/polymarket-api";
+import { AIAnalyzer } from "../orchestrator/ai-analyzer";
 
 export class ArbitrageDetector {
   private api: PolymarketAPI;
   private minProfitMargin: number;
   private minLiquidity: number;
+  private aiAnalyzer: AIAnalyzer | null = null;
 
-  constructor(api: PolymarketAPI) {
+  constructor(api: PolymarketAPI, aiAnalyzer?: AIAnalyzer) {
     this.api = api;
     this.minProfitMargin = config.trading.minProfitMargin;
     this.minLiquidity = config.trading.minLiquidity;
+    
+    // Initialize AI analyzer if provided or if AI is enabled
+    if (aiAnalyzer) {
+      this.aiAnalyzer = aiAnalyzer;
+    } else if (config.ai?.enabled) {
+      this.aiAnalyzer = new AIAnalyzer();
+    }
+    
+    if (this.aiAnalyzer?.isEnabled()) {
+      logger.info('ArbitrageDetector initialized with AI analysis', {
+        agents: this.aiAnalyzer.getEnabledAgents(),
+      });
+    }
   }
 
   async detectOpportunities(markets: Market[]): Promise<ArbitrageOpportunity[]> {
@@ -46,6 +61,23 @@ export class ArbitrageDetector {
 
       if (opportunity.profitMargin < this.minProfitMargin) {
         return null;
+      }
+
+      // Enhance with AI analysis if enabled
+      if (this.aiAnalyzer?.isEnabled()) {
+        const aiAnalysis = await this.aiAnalyzer.analyze(opportunity);
+        if (aiAnalysis) {
+          opportunity.aiAnalysis = aiAnalysis;
+          
+          // Filter based on AI recommendation
+          if (aiAnalysis.finalRecommendation === 'SKIP') {
+            logger.info('AI recommended skipping opportunity', {
+              marketId: opportunity.marketId,
+              reason: aiAnalysis.summary,
+            });
+            return null;
+          }
+        }
       }
 
       return opportunity;
